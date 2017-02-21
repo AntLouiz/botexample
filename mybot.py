@@ -34,7 +34,7 @@ class Bot():
 		self.name = name
 		self.token = token
 		self.url = "https://api.telegram.org/bot{}/".format(self.token)
-		self.commands = ['/play','/today']
+		self.commands = ['/play','/today','hello']
 
 	def get_url(self, url = None, offset=None):
 		'''
@@ -77,15 +77,6 @@ class Bot():
 
 		return last_update
 
-	'''def get_last_message(self, offset= None):
-
-		last_update = self.get_last_update()
-
-		message_text = last_update['message']['text']
-		chat_id = last_update['message']['chat']['id']
-
-		return chat_id, message_text # return a tuple with the message id and the text message'''
-
 	def send_message(self, message, chat_id):
 		'''
 			Send a message to a given chat id 
@@ -106,6 +97,8 @@ class Bot():
 		if command == '/today':
 			bot.today(chat_id)
 
+		if command == 'hello':
+			bot.send_message('hi :D', chat_id)
 
 
 	def play(self, chat_id, update_id):
@@ -192,7 +185,7 @@ def main():
 			message = last_update['message']['text']
 			chat_id = last_update['message']['chat']['id']
 
-			if message in bot.commands:
+			if message.lower() in bot.commands:
 				bot.make_command(message, chat_id, last_update_id)
 				last_update_id += 1
 			else:
