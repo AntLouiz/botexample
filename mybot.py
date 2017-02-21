@@ -41,14 +41,15 @@ class Bot():
 		 	Make a request on a given url and return a json with the data.
 		'''
 
-		params = {'offset':offset, 'timeout':20} # set the offset(update_id) and timeout to 20s
-
+		params = {'offset':offset} # set the offset(update_id) and timeout to 20s
+	
 		if url:
-			response = requests.get(url, data=params) 
+			response = requests.get(url,data=params) 
 		else:
-			response = requests.get(self.url, data=params)
+			response = requests.get(self.url)
 
 		data = response.content.decode("utf8") # decode the response to utf8
+
 		return json.loads(data)
 
 	def get_updates(self, offset = None):
@@ -58,6 +59,7 @@ class Bot():
 
 		url = self.url+"getUpdates"
 		data = self.get_url(url, offset)
+
 		return data
 
 	def get_last_update(self, offset = None):
@@ -67,20 +69,22 @@ class Bot():
 
 		updates = self.get_updates(offset)
 
-		id_last_update = len(updates['result']) -1 # catch the last id on the updates
-
-		last_update = updates['result'][id_last_update] # catch the number of last update
+		if updates['result']:
+			id_last_update = len(updates['result']) -1 # catch the last id on the updates
+			last_update = updates['result'][id_last_update] # catch the number of last update
+		else:
+			return updates['result']
 
 		return last_update
 
-	def get_last_message(self, offset= None):
+	'''def get_last_message(self, offset= None):
 
-		last_update = self.get_last_update(offset)
+		last_update = self.get_last_update()
 
 		message_text = last_update['message']['text']
 		chat_id = last_update['message']['chat']['id']
 
-		return chat_id, message_text # return a tuple with the message id and the text message
+		return chat_id, message_text # return a tuple with the message id and the text message'''
 
 	def send_message(self, message, chat_id):
 		'''
@@ -115,7 +119,9 @@ class Bot():
 
 		while True:
 			winner = 0
-			person_move = self.get_last_message(update_id)[1] # catch the last person message
+			last_update = self.get_last_update(update_id) # catch the last person message
+
+			person_move = last_update['message']['text']
 
 			if person_move in options:  # if the message in options
 				bot_move = choice(options) # the bot will make a move
@@ -169,27 +175,28 @@ class Bot():
 bot = Bot('antlouizlabsbot','352811189:AAFf4qilRrCixf7vGTHb2MfY12fpsFBOOFM')
 
 def main():
-	update_id = bot.get_last_update()['update_id']
-	chat_id, _ = bot.get_last_message()
+
 
 	print("Executing the {}.".format(bot.name))
 
+	last_update = bot.get_last_update()
+	last_update_id = None
+
 	while True:
+		last_update = bot.get_last_update(last_update_id)
 
-		chat_id, message = bot.get_last_message(update_id)
-		print(message)
+		if last_update:
+			if not last_update_id:
+				last_update_id = last_update['update_id']
 
-		if message in bot.commands:
-			bot.make_command(message, chat_id, update_id)
-			update_id += 1
-		else:
-			bot.send_message(
-				"I don't undestand that command :/ \n, please send : {}."
-				.format(bot.commands)
-				, chat_id)
+			message = last_update['message']['text']
+			chat_id = last_update['message']['chat']['id']
 
-
-			update_id += 1
+			if message in bot.commands:
+				bot.make_command(message, chat_id, last_update_id)
+				last_update_id += 1
+			else:
+				last_update_id += 1
 
 if __name__ == '__main__':
 	main()
