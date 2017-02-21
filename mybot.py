@@ -41,7 +41,7 @@ class Bot():
 		 	Make a request on a given url and return a json with the data.
 		'''
 
-		params = {'offset':offset, 'timeout':30} # set the offset(update_id) and timeout to 20s
+		params = {'offset':offset} # set the offset(update_id) and timeout to 20s
 	
 		if url:
 			response = requests.get(url,data=params) 
