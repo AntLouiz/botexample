@@ -171,8 +171,6 @@ def main():
 
 
 	print("Executing the {}.".format(bot.name))
-
-	last_update = bot.get_last_update()
 	last_update_id = None
 
 	while True:
